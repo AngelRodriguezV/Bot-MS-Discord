@@ -8,6 +8,10 @@ import discord
 from discord.ext import commands
 from python_aternos import Client, Status, ServerStartError, atserver, atwss
 
+VERDE = 0x00FF00
+ROJO = 0xFE2E2E
+AMARILLO = 0xFFBF00
+
 with open('settings.json') as file:
     data = json.load(file)
 
@@ -43,7 +47,7 @@ async def on_ready():
 @commands.has_role("Jugador")
 async def server(ctx):
     myServer = selec_server()
-    embed = discord.Embed(title="Datos del Servidor", color=0x00FF00)
+    embed = discord.Embed(title="Datos del Servidor", color=VERDE)
     embed.add_field(name='Nombre del servidor',value=f' {myServer.subdomain}',inline=False)
     embed.add_field(name='Dirección del servidor',value=f' {myServer.domain}',inline=False)
     embed.add_field(name='Puerto',value=f' {myServer.port}',inline=False)
@@ -57,9 +61,9 @@ async def status(ctx):
         embed = None
         myServer = selec_server()
         if myServer.status_num == Status.off:
-            embed = discord.Embed(title="Desconectado", color=0xFE2E2E)
+            embed = discord.Embed(title="Desconectado", color=ROJO)
         if myServer.status_num == Status.on:
-            embed = discord.Embed(title="En Linea",color=0x00FF00)
+            embed = discord.Embed(title="En Linea",color=VERDE)
         await ctx.send(embed=embed)
 
 # Evento para obtener los jugadores activos
@@ -71,7 +75,7 @@ async def players(ctx):
         cad = ""
         for c in myServer.players_list:
             cad += "\n" + c
-        await ctx.send(embed=discord.Embed(title=f"Jugadores {myServer.players_count}/{myServer.slots}",description=cad,color=0x00FF00))
+        await ctx.send(embed=discord.Embed(title=f"Jugadores {myServer.players_count}/{myServer.slots}",description=cad,color=VERDE))
 
 # Evento para iniciar el servidor
 @bot.command(name="star", pass_context=True, help="Inicia el servidor")
@@ -83,11 +87,11 @@ async def star(ctx):
         try:
             if myServer.status_num == Status.off:
                 myServer.start()
-                await ctx.send(embed=discord.Embed(title=f"Iniciando el servidor {myServer.subdomain}",color=0xFFBF00))
+                await ctx.send(embed=discord.Embed(title=f"Iniciando el servidor {myServer.subdomain}",color=AMARILLO))
             else:
-                await ctx.send(embed=discord.Embed(title=f"El Servidor {myServer.subdomain} esta en Linea",color=0x00FF00))
+                await ctx.send(embed=discord.Embed(title=f"El Servidor {myServer.subdomain} esta en Linea",color=VERDE))
         except ServerStartError as err:
-            await ctx.send(embed=discord.Embed(title=f'No se pudo iniciar el servidor {myServer.subdomain}\n{err.MESSAGE}', color=0xFE2E2E))
+            await ctx.send(embed=discord.Embed(title=f'No se pudo iniciar el servidor {myServer.subdomain}\n{err.MESSAGE}', color=ROJO))
 
 # Evento para parar el servidor
 @bot.command(name="stop", pass_context=True, help="Para el servidor")
@@ -98,11 +102,16 @@ async def stop(ctx):
         try:
             if myServer.status_num == Status.on:
                 myServer.stop()
-                await ctx.send(embed=discord.Embed(title=f"Se apagara el servidor {myServer.subdomain}",color=0xFFBF00))
+                await ctx.send(embed=discord.Embed(title=f"Se apagara el servidor {myServer.subdomain}",color=AMARILLO))
             else:
-                await ctx.send(embed=discord.Embed(title=f"El Servidor {myServer.subdomain} esta en Apagado",color=0xFFBF00))
+                await ctx.send(embed=discord.Embed(title=f"El Servidor {myServer.subdomain} esta en Apagado",color=AMARILLO))
         except ServerStartError as err:
-            await ctx.send(embed=discord.Embed(title=f'{myServer.subdomain}\n{err.MESSAGE}', color=0xFE2E2E))
+            await ctx.send(embed=discord.Embed(title=f'{myServer.subdomain}\n{err.MESSAGE}', color=ROJO))
+
+# Evento de enviar un mensaje al servidor
+@bot.command(name="msg", pass_context=True, help="Para el servidor")
+async def msg(ctx):
+    await socket.send("say <DISCORD> ola soy omelo chino")
 
 # Capturar el error
 @bot.event
